@@ -119,5 +119,19 @@ namespace RedisEasyClient
 				return true;
 			}
 		}
+		/// <summary>
+		/// Get a count of inserted items of a object.
+		/// </summary>
+		/// <typeparam name="T">Object type</typeparam>
+		/// <returns>Qt of items of object.</returns>
+		public static int GetQtItemsByType<T>()
+		{
+			using (var client = ClientsManager.GetClient())
+			{
+				var c = client.As<T>();
+				var all = c.GetAllKeys();
+				return all.Count;
+			}
+		}
 	}
 }
