@@ -86,5 +86,38 @@ namespace RedisEasyClient
 				return res;
 			}
 		}
+		/// <summary>
+		/// Drop any object from Redis by a custom key. (Stored by "StoreCustomKeyOnCache" method)
+		/// </summary>
+		/// <typeparam name="T">Type of object to be droped.</typeparam>
+		/// <param name="key">Key property value.</param>
+		/// <returns>Key matched object. False in case of errors.</returns>
+		public static bool DropCustomKeyOnCache<T>(string key)
+		{
+			using (var client = ClientsManager.GetClient())
+			{
+				var res = client.Get<T>(key);
+				client.Delete(res);
+				return true;
+			}
+		}
+		/// <summary>
+		/// Drop any object from Redis by object.
+		/// To drop from another key for object (Ex.: FkClient), use "DropCustomKeyOnCache" method.
+		/// </summary>
+		/// <typeparam name="T">Type of object.</typeparam>
+		/// <param name="value">Object to be droped.</param>
+		/// <returns>Return false when in case of any error.</returns>
+		public static bool DropTypedInCache<T>(T value)
+		{
+
+			using (var client = ClientsManager.GetClient())
+			{
+				var id = value.GetId();
+				var typed = client.As<T>();
+				typed.DeleteById(id);
+				return true;
+			}
+		}
 	}
 }
