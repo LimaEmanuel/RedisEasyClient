@@ -46,7 +46,6 @@ namespace RedisEasyClient
 		/// </summary>
 		/// <typeparam name="T">Type of object.</typeparam>
 		/// <param name="value">Object to be stored.</param>
-		/// /// <param name="expiresIn">TTL. Default is 365 days.</param>
 		/// <returns>Return false when in case of any error.</returns>
 		public static void StoreTypedOnCache<T>(T value)
 		{
@@ -153,11 +152,17 @@ namespace RedisEasyClient
 		/// </summary>
 		/// <typeparam name="T">Object type</typeparam>
 		/// <returns>Qt of items of object.</returns>
-		public static int GetQtItemsByType<T>()
+		public static long GetQtItemsByType<T>()
 		{
 			var tipo = typeof(T).Name.ToLower();
 			var db = Redis.GetDatabase();
-			return db.HashKeys(tipo).Length;
+			return db.HashLength(tipo);
+		}
+		public static long GetQtItemsByCustomTypeKey<T>(string keyName)
+		{
+			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
+			var db = Redis.GetDatabase();
+			return db.HashLength(tipo);
 		}
 		private static object GetId<T>(this T obj)
 		{
