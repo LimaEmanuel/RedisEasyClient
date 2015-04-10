@@ -133,10 +133,10 @@ namespace RedisEasyClient
 			db.HashDelete(tipo, key.ToString());
 		}
 
-		public static void StoreSigleKeyOnCache(string key, object value)
+		public static void StoreSigleKeyOnCache(string key, object value, TimeSpan? expires = null)
 		{
 			var db = Redis.GetDatabase();
-			db.StringSet(key, value.Serialize());
+			db.StringSet(key, value.Serialize(),expires);
 		}
 
 		public static T GetSigleKeyFromCache<T>(string key)
