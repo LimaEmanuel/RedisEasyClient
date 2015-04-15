@@ -6,6 +6,8 @@ using System.Runtime.Remoting;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Configuration;
+using System.Web.UI;
+using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 
@@ -52,7 +54,7 @@ namespace RedisEasyClient
 			var tipo = typeof(T).Name.ToLower();
 			var key = value.GetId();
 			var db = Redis.GetDatabase();
-			db.HashSet(tipo, key.ToString(), value.Serialize());
+			db.HashSet(tipo, key.ToString(), JsonConvert.SerializeObject(value));
 		}
 		/// <summary>
 		/// Story any object on Redis and sets up a Custom key retrieve it after.
@@ -66,7 +68,7 @@ namespace RedisEasyClient
 		{
 			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
 			var db = Redis.GetDatabase();
-			db.HashSet(tipo, keyValue, obj.Serialize());
+			db.HashSet(tipo, keyValue, JsonConvert.SerializeObject(obj));
 		}
 		/// <summary>
 		/// Get any object from Redis by a single Id.
@@ -136,7 +138,7 @@ namespace RedisEasyClient
 		public static void StoreSigleKeyOnCache(string key, object value, TimeSpan? expires = null)
 		{
 			var db = Redis.GetDatabase();
-			db.StringSet(key, value.Serialize(),expires);
+			db.StringSet(key, JsonConvert.SerializeObject(value), expires);
 		}
 
 		public static T GetSigleKeyFromCache<T>(string key)
@@ -173,10 +175,6 @@ namespace RedisEasyClient
 				return id.GetValue(obj);
 			return null;
 		}
-
-		private static string Serialize(this object obj)
-		{
-			return JsonConvert.SerializeObject(obj);
-		}
+	
 	}
 }
