@@ -149,6 +149,20 @@ namespace RedisEasyClient
 				return default(T);
 			return JsonConvert.DeserializeObject<T>(strObj);
 		}
+
+		public static List<T> GetAllItemsFromHash<T>(string hash)
+		{
+			var db = Redis.GetDatabase();
+			var its = db.HashGetAll(hash);
+			var lst = its.Select(i => JsonConvert.DeserializeObject<T>(i.Value)).ToList();
+			return lst;
+		}
+		public static List<string> GetAllKeysFromHash(string hash)
+		{
+			var db = Redis.GetDatabase();
+			var its = db.HashKeys(hash).ToList();
+			return its.Select(i => (string) i).ToList();
+		}
 		/// <summary>
 		/// Get a count of inserted items of a object.
 		/// </summary>
