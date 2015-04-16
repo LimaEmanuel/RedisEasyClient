@@ -150,10 +150,13 @@ namespace RedisEasyClient
 			return JsonConvert.DeserializeObject<T>(strObj);
 		}
 
-		public static List<T> GetAllItemsFromHash<T>(string hash)
+		public static List<T> GetAllItemsFromType<T>(string keyName = null)
 		{
+			var tipo = typeof(T).Name.ToLower();
+			if (!string.IsNullOrEmpty(keyName))
+				tipo += "_by_" + keyName.ToLower();
 			var db = Redis.GetDatabase();
-			var its = db.HashGetAll(hash);
+			var its = db.HashGetAll(tipo);
 			var lst = its.Select(i => JsonConvert.DeserializeObject<T>(i.Value)).ToList();
 			return lst;
 		}
