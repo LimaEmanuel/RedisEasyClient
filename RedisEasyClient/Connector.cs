@@ -11,6 +11,7 @@ using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
 using Newtonsoft.Json;
 
+using System.Diagnostics;
 namespace RedisEasyClient
 {
 	public static class Connector
@@ -223,13 +224,44 @@ namespace RedisEasyClient
 		}
 		private static object GetId<T>(this T obj)
 		{
-			var t = typeof (T);
+            var t = typeof(T);
 			var props = t.GetProperties();
-			var id = props.FirstOrDefault(i => i.Name.ToLower() == "id");
+            var id = props.FirstOrDefault(i => i.Name.ToLower() == "id") ?? props.FirstOrDefault(i => i.Name.ToLower().Contains("id"));
 			if (id != null)
 				return id.GetValue(obj);
 			return null;
 		}
-	
+
+        public static List<T> GetAllList<T>(string keyName)
+        {
+            var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
+            var db = Redis.GetDatabase();
+            var obj = db.HashGetAll(tipo).ToList();
+            return obj.Select(i => JsonConvert.DeserializeObject<T>(i.Value)).ToList();
+        }
+        public static List<T> GetAllList<T>()
+        {
+            try
+            {
+                var tipo = typeof(T).Name.ToLower();
+                var db = Redis.GetDatabase();
+                var tamanho = GetQtItemsByType<T>();
+                if (tamanho > 65000)
+                {
+                    var obj = db.HashKeys(tipo).ToList();
+                    return obj.Select(i => GetTypedFromCache<T>(i)).ToList();
+                }
+                var obj2 = db.HashGetAll(tipo).ToList();
+                return obj2.Select(i => JsonConvert.DeserializeObject<T>(i.Value)).ToList();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+        private static string Serialize(this object obj)
+        {
+            return JsonConvert.SerializeObject(obj);
+        }
 	}
 }
