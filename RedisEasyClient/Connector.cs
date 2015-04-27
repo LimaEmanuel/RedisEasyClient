@@ -114,9 +114,15 @@ namespace RedisEasyClient
 		/// <typeparam name="T">Type of object to be droped.</typeparam>
 		/// <param name="key">Key property value.</param>
 		/// <returns>Key matched object. False in case of errors.</returns>
-		public static void DropCustomKeyOnCache<T>(string keyName, string keyValue)
+		public static void DropCustomKeyFromCache<T>(string keyName, string keyValue)
 		{
 			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
+			var db = Redis.GetDatabase();
+			db.HashDelete(tipo, keyValue);
+		}
+		public static void DropTypedKeyFromCache<T>(string keyValue)
+		{
+			var tipo = typeof(T).Name.ToLower();
 			var db = Redis.GetDatabase();
 			db.HashDelete(tipo, keyValue);
 		}
@@ -134,13 +140,46 @@ namespace RedisEasyClient
 			var db = Redis.GetDatabase();
 			db.HashDelete(tipo, key.ToString());
 		}
-
+		public static void DropByCustomType<T>(string keyName)
+		{
+			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
+			var db = Redis.GetDatabase();
+			var keys = db.HashKeys(tipo).ToList();
+			foreach (var key in keys)
+				db.HashDelete(tipo, key);
+		}
+		/// <summary>
+		/// All keys will droped, except keys especified.
+		/// </summary>
+		/// <typeparam name="T">Type of object</typeparam>
+		/// <param name="keyName">key to specific</param>
+		/// <param name="exceptKeys">Excepts still store in cache</param>
+		/// <returns>Qt of removed itens</returns>
+		public static int DropExceptByCustomType<T>(string keyName, List<string> exceptKeys)
+		{
+			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
+			var db = Redis.GetDatabase();
+			List<string> keys = db.HashKeys(tipo).Select(i => i.ToString()).ToList();
+			var toDelete = keys.Except(exceptKeys).ToList();
+			foreach (var key in toDelete)
+				db.HashDelete(tipo, key);
+			return toDelete.Count();
+		}
+		public static int DropExceptByTyped<T>(List<string> exceptKeys)
+		{
+			var tipo = typeof(T).Name.ToLower();
+			var db = Redis.GetDatabase();
+			List<string> keys = db.HashKeys(tipo).Select(i => i.ToString()).ToList();
+			var toDelete = keys.Except(exceptKeys).ToList();
+			foreach (var key in toDelete)
+				db.HashDelete(tipo, key);
+			return toDelete.Count();
+		}
 		public static void StoreSigleKeyOnCache(string key, object value, TimeSpan? expires = null)
 		{
 			var db = Redis.GetDatabase();
 			db.StringSet(key, JsonConvert.SerializeObject(value), expires);
 		}
-
 		public static T GetSigleKeyFromCache<T>(string key)
 		{
 			var db = Redis.GetDatabase();
@@ -149,7 +188,6 @@ namespace RedisEasyClient
 				return default(T);
 			return JsonConvert.DeserializeObject<T>(strObj);
 		}
-
 		public static List<T> GetAllItemsFromType<T>(string keyName = null)
 		{
 			var tipo = typeof(T).Name.ToLower();
