@@ -176,6 +176,17 @@ namespace RedisEasyClient
 				db.HashDelete(tipo, key);
 			return toDelete.Count();
 		}
+		public static void DropSigleKeyOnCache<T>(string key)
+		{
+			var tipo = typeof(T).Name.ToLower();
+			var db = Redis.GetDatabase();
+			db.HashDelete(tipo, key);
+		}
+		public static void DropSigleKeyOnCache(string key)
+		{
+			var db = Redis.GetDatabase();
+			db.KeyDelete(key);
+		}
 		public static void StoreSigleKeyOnCache(string key, object value, TimeSpan? expires = null)
 		{
 			var db = Redis.GetDatabase();
