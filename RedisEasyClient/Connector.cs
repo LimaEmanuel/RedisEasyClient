@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Remoting;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Configuration;
 using System.Web.UI;
@@ -166,6 +167,16 @@ namespace RedisEasyClient
 				db.HashDelete(tipo, key);
 			return toDelete.Count();
 		}
+
+		public static int DropAllByStringHash(string hash)
+		{
+			var tipo = hash.ToLower();
+			var db = Redis.GetDatabase();
+			List<string> keys = db.HashKeys(tipo).Select(i => i.ToString()).ToList();
+			foreach (var key in keys)
+				db.HashDelete(tipo, key);
+			return keys.Count;
+		}
 		public static int DropExceptByTyped<T>(List<string> exceptKeys)
 		{
 			var tipo = typeof(T).Name.ToLower();
@@ -176,6 +187,7 @@ namespace RedisEasyClient
 				db.HashDelete(tipo, key);
 			return toDelete.Count();
 		}
+		
 		public static void DropSigleKeyOnCache<T>(string key)
 		{
 			var tipo = typeof(T).Name.ToLower();
