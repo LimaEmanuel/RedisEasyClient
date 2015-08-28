@@ -192,6 +192,11 @@ namespace RedisEasyClient
 			var db = Redis.GetDatabase();
 			db.StringSet(key, JsonConvert.SerializeObject(value), expires);
 		}
+        public static void StoreSigleKeyOnCacheDecimal(string key, decimal value)
+        {
+            var db = Redis.GetDatabase();
+            db.StringSet(key, JsonConvert.SerializeObject(value));
+        }
 		public static T GetSigleKeyFromCache<T>(string key)
 		{
 			var db = Redis.GetDatabase();
