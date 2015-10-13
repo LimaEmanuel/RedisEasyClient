@@ -11,7 +11,6 @@ using System.Web.UI;
 using Newtonsoft.Json.Serialization;
 using StackExchange.Redis;
 using Newtonsoft.Json;
-
 using System.Diagnostics;
 namespace RedisEasyClient
 {
@@ -291,5 +290,5 @@ namespace RedisEasyClient
         {
             return JsonConvert.SerializeObject(obj);
         }
-	}
+    }
 }
