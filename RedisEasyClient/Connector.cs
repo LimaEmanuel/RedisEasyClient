@@ -65,12 +65,14 @@ namespace RedisEasyClient
 		/// <param name="key">Key to retrieve object after.</param>
 		/// /// /// <param name="expiresIn">TTL. Default is 365 days.</param>
 		/// <returns>Return false when in case of any error.</returns>
-		public static void StoreCustomKeyOnCache<T>(T obj, string keyName, string keyValue)
+		public static void StoreCustomKeyOnCache<T>(T obj, string keyName, string keyValue, string objName = "")
 		{
-			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
+		    objName = (objName != string.Empty ? objName : typeof (T).Name.ToLower()).ToLower();
+            var tipo = objName + "_by_" + keyName.ToLower();
 			var db = Redis.GetDatabase();
 			db.HashSet(tipo, keyValue, JsonConvert.SerializeObject(obj));
 		}
+        
 		/// <summary>
 		/// Get any object from Redis by a single Id.
 		/// </summary>
@@ -92,11 +94,12 @@ namespace RedisEasyClient
 		/// <typeparam name="T">Type of object to be retrieved.</typeparam>
 		/// <param name="key">Key property value.</param>
 		/// <returns>Key matched object. Null if any matchs.</returns>
-		public static T GetCustomKeyOnCache<T>(string keyName, string keyValue)
+        public static T GetCustomKeyOnCache<T>(string keyName, string keyValue, string objName = "")
 		{
 			try
 			{
-				var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
+                objName = (objName != string.Empty ? objName : typeof(T).Name.ToLower()).ToLower();
+                var tipo = objName + "_by_" + keyName.ToLower();
 				var db = Redis.GetDatabase();
 				var strObj = db.HashGet(tipo, keyValue);
 				if (string.IsNullOrEmpty(strObj))
