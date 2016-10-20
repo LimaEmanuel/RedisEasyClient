@@ -43,59 +43,10 @@ namespace RedisEasyClient
             Redis = ConnectionMultiplexer.Connect(Domain);
         }
 
-        /// <summary>
-        /// Store any object on Redis, the key will be a Id porterty of object.
-        /// To another key for object (Ex.: FkClient), use "StoreCustomKeyOnCache" method.
-        /// </summary>
-        /// <typeparam name="T">Type of object.</typeparam>
-        /// <param name="value">Object to be stored.</param>
-        /// <returns>Return false when in case of any error.</returns>
-        public static void StoreTypedOnCache<T>(T value)
-        {
-            var tipo = typeof(T).Name.ToLower();
-            var key = value.GetId();
-            var db = Redis.GetDatabase();
-            db.HashSet(tipo, key.ToString(), JsonConvert.SerializeObject(value));
-        }
-        /// <summary>
-        /// Story any object on Redis and sets up a Custom key retrieve it after.
-        /// </summary>
-        /// <typeparam name="T">Type of object.</typeparam>
-        /// <param name="obj">Object to be stored.</param>
-        /// <param name="key">Key to retrieve object after.</param>
-        /// /// /// <param name="expiresIn">TTL. Default is 365 days.</param>
-        /// <returns>Return false when in case of any error.</returns>
-        public static void StoreCustomKeyOnCache<T>(T obj, string keyName, string keyValue, string objName = "")
-        {
-            var itemName = objName;
-            if (itemName == "")
-                itemName = GetObjName((typeof(T)).FullName, (typeof(T)).Name);
-            var tipo = (itemName + "_by_" + keyName).ToLower();
-            var db = Redis.GetDatabase();
-            db.HashSet(tipo, keyValue, JsonConvert.SerializeObject(obj));
-        }
+       
+       
 
-        /// <summary>
-        /// Get any object from Redis by a single Id.
-        /// </summary>
-        /// <typeparam name="T">Type of object to be retrieved.</typeparam>
-        /// <param name="id">Id proterty value.</param>
-        /// <returns>Id matched object. Null if any matchs.</returns>
-        public static T GetTypedFromCache<T>(object id)
-        {
-            var tipo = (GetObjName((typeof(T)).FullName, (typeof(T)).Name)).ToLower();
-            var db = Redis.GetDatabase();
-            var strObj = db.HashGet(tipo, id.ToString());
-            if (string.IsNullOrEmpty(strObj))
-                return default(T);
-            return JsonConvert.DeserializeObject<T>(strObj);
-        }
-        /// <summary>
-        /// Get any object from Redis by a custom key. (Stored by "StoreCustomKeyOnCache" method)
-        /// </summary>
-        /// <typeparam name="T">Type of object to be retrieved.</typeparam>
-        /// <param name="key">Key property value.</param>
-        /// <returns>Key matched object. Null if any matchs.</returns>
+        
         public static T GetCustomKeyOnCache<T>(string keyName, string keyValue, string objName = "")
         {
             try
@@ -116,12 +67,6 @@ namespace RedisEasyClient
                 return JsonConvert.DeserializeObject<T>("{}");
             }
         }
-        /// <summary>
-        /// Drop any object from Redis by a custom key. (Stored by "StoreCustomKeyOnCache" method)
-        /// </summary>
-        /// <typeparam name="T">Type of object to be droped.</typeparam>
-        /// <param name="key">Key property value.</param>
-        /// <returns>Key matched object. False in case of errors.</returns>
         public static void DropCustomKeyFromCache<T>(string keyName, string keyValue)
         {
             var tipo = (GetObjName((typeof(T)).FullName, (typeof(T)).Name) + "_by_" + keyName).ToLower();
@@ -173,21 +118,14 @@ namespace RedisEasyClient
                 db.HashDelete(tipo, key);
             return toDelete.Count();
         }
-
-		/// <summary>
-		/// Store any object on Redis, the key will be a Id porterty of object.
-		/// To another key for object (Ex.: FkClient), use "StoreCustomKeyOnCache" method.
-		/// </summary>
-		/// <typeparam name="T">Type of object.</typeparam>
-		/// <param name="value">Object to be stored.</param>
-		/// <returns>Return false when in case of any error.</returns>
-		public static void StoreTypedOnCache<T>(T value)
-		{
-			var tipo = typeof(T).Name.ToLower();
-			var key = value.GetId();
-			var db = Redis.GetDatabase();
-			db.HashSet(tipo, key.ToString(), JsonConvert.SerializeObject(value));
-		}
+       
+        public static void StoreTypedOnCache<T>(T value)
+        {
+            var tipo = typeof(T).Name.ToLower();
+            var key = value.GetId();
+            var db = Redis.GetDatabase();
+            db.HashSet(tipo, key.ToString(), JsonConvert.SerializeObject(value));
+        }
 		/// <summary>
 		/// Story any object on Redis and sets up a Custom key retrieve it after.
 		/// </summary>
@@ -203,103 +141,15 @@ namespace RedisEasyClient
 			var db = Redis.GetDatabase();
 			db.HashSet(tipo, keyValue, JsonConvert.SerializeObject(obj));
 		}
+		
+		
         
-		/// <summary>
-		/// Get any object from Redis by a single Id.
-		/// </summary>
-		/// <typeparam name="T">Type of object to be retrieved.</typeparam>
-		/// <param name="id">Id proterty value.</param>
-		/// <returns>Id matched object. Null if any matchs.</returns>
-		public static T GetTypedFromCache<T>(object id)
-		{
-			var tipo = typeof(T).Name.ToLower();
-			var db = Redis.GetDatabase();
-			var strObj = db.HashGet(tipo, id.ToString());
-			if (string.IsNullOrEmpty(strObj))
-				return default(T);
-			return JsonConvert.DeserializeObject<T>(strObj);
-		}
-		/// <summary>
-		/// Get any object from Redis by a custom key. (Stored by "StoreCustomKeyOnCache" method)
-		/// </summary>
-		/// <typeparam name="T">Type of object to be retrieved.</typeparam>
-		/// <param name="key">Key property value.</param>
-		/// <returns>Key matched object. Null if any matchs.</returns>
-        public static T GetCustomKeyOnCache<T>(string keyName, string keyValue, string objName = "")
-		{
-			try
-			{
-                objName = (objName != string.Empty ? objName : typeof(T).Name.ToLower()).ToLower();
-                var tipo = objName + "_by_" + keyName.ToLower();
-				var db = Redis.GetDatabase();
-				var strObj = db.HashGet(tipo, keyValue);
-				if (string.IsNullOrEmpty(strObj))
-					return default(T);	
-				return JsonConvert.DeserializeObject<T>(strObj);
-			}
-			catch (Exception)
-			{
-				//return a null obj
-				return JsonConvert.DeserializeObject<T>("{}");
-			}
-		}
-		/// <summary>
-		/// Drop any object from Redis by a custom key. (Stored by "StoreCustomKeyOnCache" method)
-		/// </summary>
-		/// <typeparam name="T">Type of object to be droped.</typeparam>
-		/// <param name="key">Key property value.</param>
-		/// <returns>Key matched object. False in case of errors.</returns>
-		public static void DropCustomKeyFromCache<T>(string keyName, string keyValue)
-		{
-			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
-			var db = Redis.GetDatabase();
-			db.HashDelete(tipo, keyValue);
-		}
-		public static void DropTypedKeyFromCache<T>(string keyValue)
-		{
-			var tipo = typeof(T).Name.ToLower();
-			var db = Redis.GetDatabase();
-			db.HashDelete(tipo, keyValue);
-		}
-		/// <summary>
-		/// Drop any object from Redis by object.
-		/// To drop from another key for object (Ex.: FkClient), use "DropCustomKeyOnCache" method.
-		/// </summary>
-		/// <typeparam name="T">Type of object.</typeparam>
-		/// <param name="value">Object to be droped.</param>
-		/// <returns>Return false when in case of any error.</returns>
-		public static void DropTypedOnCache<T>(T value)
-		{
-			var tipo = typeof(T).Name.ToLower();
-			var key = value.GetId();
-			var db = Redis.GetDatabase();
-			db.HashDelete(tipo, key.ToString());
-		}
-		public static void DropByCustomType<T>(string keyName)
-		{
-			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
-			var db = Redis.GetDatabase();
-			var keys = db.HashKeys(tipo).ToList();
-			foreach (var key in keys)
-				db.HashDelete(tipo, key);
-		}
-		/// <summary>
-		/// All keys will droped, except keys especified.
-		/// </summary>
-		/// <typeparam name="T">Type of object</typeparam>
-		/// <param name="keyName">key to specific</param>
-		/// <param name="exceptKeys">Excepts still store in cache</param>
-		/// <returns>Qt of removed itens</returns>
-		public static int DropExceptByCustomType<T>(string keyName, List<string> exceptKeys)
-		{
-			var tipo = typeof(T).Name.ToLower() + "_by_" + keyName.ToLower();
-			var db = Redis.GetDatabase();
-			List<string> keys = db.HashKeys(tipo).Select(i => i.ToString()).ToList();
-			var toDelete = keys.Except(exceptKeys).ToList();
-			foreach (var key in toDelete)
-				db.HashDelete(tipo, key);
-			return toDelete.Count();
-		}
+		
+		
+		
+		
+		
+		
 
 
         public static void DropSigleKeyOnCache<T>(string key)
@@ -405,7 +255,21 @@ namespace RedisEasyClient
         {
             return JsonConvert.SerializeObject(obj);
         }
-
+        /// <summary>
+        /// Get any object from Redis by a single Id.
+        /// </summary>
+        /// <typeparam name="T">Type of object to be retrieved.</typeparam>
+        /// <param name="id">Id proterty value.</param>
+        /// <returns>Id matched object. Null if any matchs.</returns>
+        public static T GetTypedFromCache<T>(object id)
+        {
+            var tipo = (GetObjName((typeof(T)).FullName, (typeof(T)).Name)).ToLower();
+            var db = Redis.GetDatabase();
+            var strObj = db.HashGet(tipo, id.ToString());
+            if (string.IsNullOrEmpty(strObj))
+                return default(T);
+            return JsonConvert.DeserializeObject<T>(strObj);
+        }
         //A intenção é evitar que as listas fiquem salvas sempre com os mesmos nomes
         public static string GetObjName(string fullname, string singlename)
         {
