@@ -124,7 +124,7 @@ namespace RedisEasyClient
             var tipo = typeof(T).Name.ToLower();
             var key = value.GetId();
             var db = Redis.GetDatabase();
-            db.HashSet(tipo, key.ToString(), JsonConvert.SerializeObject(value));
+            db.HashSet(tipo, key.ToString(), JsonConvert.SerializeObject(value,new JsonSerializerSettings{ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
         }
 		/// <summary>
 		/// Story any object on Redis and sets up a Custom key retrieve it after.
@@ -139,7 +139,7 @@ namespace RedisEasyClient
 		    objName = (objName != string.Empty ? objName : typeof (T).Name.ToLower()).ToLower();
             var tipo = objName + "_by_" + keyName.ToLower();
 			var db = Redis.GetDatabase();
-			db.HashSet(tipo, keyValue, JsonConvert.SerializeObject(obj));
+            db.HashSet(tipo, keyValue, JsonConvert.SerializeObject(obj,new JsonSerializerSettings{ReferenceLoopHandling = ReferenceLoopHandling.Ignore}));
 		}
 		
 		
